@@ -25,7 +25,7 @@ Income:
 
 Each output must follow this JSON format:
 {{
-  "category": "<income/outcome>"
+  "type": "<income/outcome>"
   "category": "<category>",
   "description": "<original transaction description>",
   "value": <amount>
