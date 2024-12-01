@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -33,9 +34,47 @@ interface Transaction {
 
 export default function Page() {
   const [message, setMessage] = useState("");
-
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingTransaction, setLoadingTransaction] = useState(true);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const router = useRouter();
+
+  const fetchTransactions = async () => {
+    setLoadingTransaction(true);
+    const { data, error } = await supabase
+      .from("transactions")
+      .select()
+      .order("id", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      toast.error("Failed to fetch transactions :(");
+      return;
+    }
+
+    setTransactions(data);
+    setLoadingTransaction(false);
+  };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+      } else {
+        setLoadingAuth(false);
+      }
+    };
+
+    checkUser();
+    fetchTransactions();
+  }, []);
+
+  if (loadingAuth) {
+    return;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,27 +136,6 @@ export default function Page() {
     fetchTransactions();
   };
 
-  const fetchTransactions = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("transactions")
-      .select()
-      .order("id", { ascending: false })
-      .limit(10);
-
-    if (error) {
-      toast.error("Failed to fetch transactions :(");
-      return;
-    }
-
-    setTransactions(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
-
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
       <Card className="w-4/5 sm:w-3/5 m-4">
@@ -148,7 +166,7 @@ export default function Page() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {loadingTransaction ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   Loading...
