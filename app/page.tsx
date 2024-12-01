@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,12 +9,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
+import { supabase } from "./utils/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+interface Transaction {
+  id: string;
+  category: string;
+  type: string;
+  value: number;
+  description: string;
+}
 
 export default function Page() {
   const [message, setMessage] = useState("");
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,10 +56,23 @@ export default function Page() {
       return;
     }
 
+    const { error } = await supabase.from("transactions").insert({
+      category: data.category,
+      type: data.type,
+      value: data.value,
+      description: data.description,
+    });
+
+    if (error) {
+      toast.error("Failed to save to database :(");
+      return;
+    }
+
     toast.success(
       <div className="gap-1">
         <div>
-          <strong>Categorized successfully</strong>
+          <strong>Categorized successfully!</strong>
+          <Separator />
         </div>
         <div>
           <strong>Category</strong>: {data.category}
@@ -60,11 +94,33 @@ export default function Page() {
       { duration: 10000 }
     );
     setMessage("");
+    fetchTransactions();
   };
 
+  const fetchTransactions = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("transactions")
+      .select()
+      .order("id", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      toast.error("Failed to fetch transactions :(");
+      return;
+    }
+
+    setTransactions(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Card className={cn("w-[380px]")}>
+    <div className="flex flex-col justify-center items-center min-h-screen">
+      <Card className="w-4/5 sm:w-3/5 m-4">
         <CardHeader>
           <CardTitle>Algorich</CardTitle>
           <CardDescription>Go rich or go home</CardDescription>
@@ -80,6 +136,42 @@ export default function Page() {
           </form>
         </CardContent>
       </Card>
+      <div className="w-4/5 sm:w-3/5 m-4">
+        <Table>
+          <TableCaption>A list of your recent transactions.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="text-right">Value</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : (
+              transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>{transaction.type}</TableCell>
+                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell className="text-right">
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(transaction.value)}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
