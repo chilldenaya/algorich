@@ -41,10 +41,19 @@ export default function Page() {
 
   const fetchTransactions = async () => {
     setLoadingTransaction(true);
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      toast.error("User not found :(");
+      setLoadingTransaction(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("transactions")
       .select()
       .order("id", { ascending: false })
+      .eq("user_id", user.id)
       .limit(10);
 
     if (error) {
@@ -78,6 +87,14 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      toast.error("User not found :(");
+      return;
+    }
+
+    const userId = user.id;
 
     toast.info("Categorizing...");
     const response = await fetch("/api/py/categorize", {
@@ -96,6 +113,7 @@ export default function Page() {
     }
 
     const { error } = await supabase.from("transactions").insert({
+      user_id: userId,
       category: data.category,
       type: data.type,
       value: data.value,
@@ -190,6 +208,16 @@ export default function Page() {
           </TableBody>
         </Table>
       </div>
+      <Button
+          className="text-xs"
+          variant="link"
+          onClick={async () => {
+            await supabase.auth.signOut();
+            router.push("/login");
+          }}
+        >
+          Logout
+        </Button>
     </div>
   );
 }
