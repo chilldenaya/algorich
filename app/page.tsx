@@ -14,15 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "./utils/supabase/client";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import TransactionTable from "@/components/ui/TransactionTable";
 
 interface Transaction {
   id: string;
@@ -41,7 +33,9 @@ export default function Page() {
 
   const fetchTransactions = async () => {
     setLoadingTransaction(true);
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       toast.error("User not found :(");
@@ -87,7 +81,9 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       toast.error("User not found :(");
@@ -154,12 +150,42 @@ export default function Page() {
     fetchTransactions();
   };
 
+  const handleUpdate = async (
+    id: string,
+    updatedTransaction: Partial<Transaction>
+  ) => {
+    const { error } = await supabase
+      .from("transactions")
+      .update(updatedTransaction)
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to update transaction :(");
+      return;
+    }
+
+    toast.success("Transaction updated successfully!");
+    fetchTransactions();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("transactions").delete().eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete transaction :(");
+      return;
+    }
+
+    toast.success("Transaction deleted successfully!");
+    fetchTransactions();
+  };
+
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
       <Card className="w-4/5 sm:w-3/5 m-4">
         <CardHeader>
           <CardTitle>Algorich</CardTitle>
-          <CardDescription>Go rich or go home</CardDescription>
+          <CardDescription>Catet yuk!</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <form onSubmit={handleSubmit} className="grid w-full gap-2">
@@ -173,51 +199,23 @@ export default function Page() {
         </CardContent>
       </Card>
       <div className="w-4/5 sm:w-3/5 m-4">
-        <Table>
-          <TableCaption>A list of your recent transactions.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Value</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loadingTransaction ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : (
-              transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.type}</TableCell>
-                  <TableCell>{transaction.category}</TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell className="text-right">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    }).format(transaction.value)}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <TransactionTable
+          transactions={transactions}
+          loadingTransaction={loadingTransaction}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
       </div>
       <Button
-          className="text-xs"
-          variant="link"
-          onClick={async () => {
-            await supabase.auth.signOut();
-            router.push("/login");
-          }}
-        >
-          Logout
-        </Button>
+        className="text-xs"
+        variant="link"
+        onClick={async () => {
+          await supabase.auth.signOut();
+          router.push("/login");
+        }}
+      >
+        Logout
+      </Button>
     </div>
   );
 }
