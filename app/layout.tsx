@@ -1,5 +1,11 @@
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/ui/app-sidebar";
 
 export const metadata = {
   title: "Algorich",
@@ -14,8 +20,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Toaster />
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <SidebarTrigger />
+            {children}
+          </SidebarInset>
+          <Toaster />
+        </SidebarProvider>
       </body>
     </html>
   );

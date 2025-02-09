@@ -10,3 +10,4 @@ class CategorizeResponse(BaseModel):
     category: str
     value: float
     description: str
+    location: str

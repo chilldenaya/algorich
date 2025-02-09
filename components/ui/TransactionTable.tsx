@@ -17,6 +17,7 @@ interface Transaction {
   type: string;
   value: number;
   description: string;
+  location: string;
 }
 
 interface TransactionTableProps {
@@ -58,6 +59,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           <TableHead>Type</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Description</TableHead>
+          <TableHead>Location</TableHead>
           <TableHead className="text-right">Value</TableHead>
           <TableHead className="text-right">Action</TableHead>
         </TableRow>
@@ -118,6 +120,22 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                   />
                 ) : (
                   transaction.description
+                )}
+              </TableCell>
+              <TableCell>
+                {editingTransaction?.id === transaction.id ? (
+                  <Input
+                    type="text"
+                    value={updatedTransaction.location || ""}
+                    onChange={(e) =>
+                      setUpdatedTransaction({
+                        ...updatedTransaction,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  transaction.location || "-"
                 )}
               </TableCell>
               <TableCell className="text-right">

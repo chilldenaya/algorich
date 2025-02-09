@@ -29,6 +29,7 @@ def categorize_transaction(prompt_str, user_message):
         response = chat_model(prompt)
 
         response_dict = repair_json(response.content, return_objects=True)
+        print(response_dict)
         return response_dict
     except json.JSONDecodeError:
         return {

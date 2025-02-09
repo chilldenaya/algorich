@@ -25,59 +25,66 @@ Income:
 
 Each output must follow this JSON format:
 {{
-  "type": "<Income/Outcome>"
+  "type": "<Income/Outcome>",
   "category": "<category>",
   "description": "<original transaction description>",
-  "value": <amount>
+  "value": <amount>,
+  "location": "<location or null>",
 }}
 
 Examples
 ```
 1.
-- Input: beli makan siang 10000
-- Output: {{"type": "Outcome", "category": "Food", "description": "makan siang", "value": 10000}}
+- Input: beli makan siang di OHO Salad Bar 10000
+- Output: {{"type": "Outcome", "category": "Food", "description": "makan siang", "value": 10000, "location": "OHO Salad Bar"}}
+```
+
+```
+1.
+- Input: Makan keluarga di restoran ABC 200000
+- Output: {{"type": "Outcome", "category": "Food", "description": "Makan keluarga", "value": 200000, "location": "Restoran ABC"}}
 ```
 
 ```
 2.
 - Input: bayar utang 25000
-- Output: {{"type": "Outcome", "category": "Others", "description": "bayar utang", "value": 25000}}
+- Output: {{"type": "Outcome", "category": "Others", "description": "bayar utang", "value": 25000, "location": null}}
 ```
 
 ```
 3.
 - Input: trf uang 50000 ke panti asuhan
-- Output: {{"type": "Outcome", "category": "Charity", "description": "trf uang ke panti asuhan", "value": 50000}}
+- Output: {{"type": "Outcome", "category": "Charity", "description": "trf uang ke panti asuhan", "value": 50000, "location": null}}
 ```
 
 ```
 4.
 - Input: bayar netflix 180000
-- Output: {{"type": "Outcome", "category": "Entertainment", "description": "bayar netflix", "value": 180000}}
+- Output: {{"type": "Outcome", "category": "Entertainment", "description": "bayar netflix", "value": 180000, "location": "Online"}}
 ```
 
 ```
 5.
 - Input: tiket konser 3000000
-- Output: {{"type": "Outcome", "category": "Entertainment", "description": "tiket konser", "value": 3000000}}
+- Output: {{"type": "Outcome", "category": "Entertainment", "description": "tiket konser", "value": 3000000, "location": null}}
 ```
 
 ```
 6.
 - Input: beli reksadana 10000000
-- Output: {{"type": "Outcome", "category": "Investment", "description": "beli reksadana", "value": 10000000}}
+- Output: {{"type": "Outcome", "category": "Investment", "description": "beli reksadana", "value": 10000000, "location": null}}
 ```
 
 ```
 7.
 - Input: dapet uang tarita 1000000
-- Output: {{"type": "Income", "category": "Freelance", "description": "beli reksadana", "value": 1000000}}
+- Output: {{"type": "Income", "category": "Freelance", "description": "beli reksadana", "value": 1000000, "location": null}}
 ```
 
 ```
 6.
 - Input: gajian bulan desember 1500000
-- Output: {{"type": "Income", "category": "Payroll", "description": "beli reksadana", "value": 1500000}}
+- Output: {{"type": "Income", "category": "Payroll", "description": "beli reksadana", "value": 1500000, "location": null}}
 ```
 
 ## Additional Notes

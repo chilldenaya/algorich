@@ -13,51 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "./utils/supabase/client";
-import TransactionTable from "@/components/ui/TransactionTable";
-
-interface Transaction {
-  id: string;
-  category: string;
-  type: string;
-  value: number;
-  description: string;
-}
+import { supabase } from "../utils/supabase/client";
 
 export default function Page() {
   const [message, setMessage] = useState("");
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loadingTransaction, setLoadingTransaction] = useState(true);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const router = useRouter();
-
-  const fetchTransactions = async () => {
-    setLoadingTransaction(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      toast.error("User not found :(");
-      setLoadingTransaction(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("transactions")
-      .select()
-      .order("id", { ascending: false })
-      .eq("user_id", user.id)
-      .limit(10);
-
-    if (error) {
-      toast.error("Failed to fetch transactions :(");
-      return;
-    }
-
-    setTransactions(data);
-    setLoadingTransaction(false);
-  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -72,7 +33,6 @@ export default function Page() {
     };
 
     checkUser();
-    fetchTransactions();
   }, []);
 
   if (loadingAuth) {
@@ -114,7 +74,6 @@ export default function Page() {
       type: data.type,
       value: data.value,
       description: data.description,
-      location: data.location,
     });
 
     if (error) {
@@ -148,37 +107,6 @@ export default function Page() {
       { duration: 10000 }
     );
     setMessage("");
-    fetchTransactions();
-  };
-
-  const handleUpdate = async (
-    id: string,
-    updatedTransaction: Partial<Transaction>
-  ) => {
-    const { error } = await supabase
-      .from("transactions")
-      .update(updatedTransaction)
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Failed to update transaction :(");
-      return;
-    }
-
-    toast.success("Transaction updated successfully!");
-    fetchTransactions();
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("transactions").delete().eq("id", id);
-
-    if (error) {
-      toast.error("Failed to delete transaction :(");
-      return;
-    }
-
-    toast.success("Transaction deleted successfully!");
-    fetchTransactions();
   };
 
   return (
@@ -186,7 +114,7 @@ export default function Page() {
       <Card className="w-4/5 sm:w-3/5 m-4">
         <CardHeader>
           <CardTitle>Algorich</CardTitle>
-          <CardDescription>Catet yuk!</CardDescription>
+          <CardDescription>Tanya AI</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <form onSubmit={handleSubmit} className="grid w-full gap-2">
@@ -199,14 +127,6 @@ export default function Page() {
           </form>
         </CardContent>
       </Card>
-      <div className="w-4/5 sm:w-3/5 m-4">
-        <TransactionTable
-          transactions={transactions}
-          loadingTransaction={loadingTransaction}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
-      </div>
     </div>
   );
 }
