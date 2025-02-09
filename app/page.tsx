@@ -22,6 +22,7 @@ interface Transaction {
   type: string;
   value: number;
   description: string;
+  location: string;
 }
 
 export default function Page() {
